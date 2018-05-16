@@ -2,8 +2,8 @@ import requests
 from urllib.parse import urlencode
 from bs4 import BeautifulSoup
 import re
-# url_base1 = "https://www.thebump.com/real-answers/v1/categories/33/questions?"
-url_base = "https://www.thebump.com/real-answers/v1/categories/"
+url_base = "https://www.thebump.com/real-answers/v1/categories/33/questions?"
+# url_base = "https://www.thebump.com/real-answers/v1/categories/"
 js = requests.get("https://www.thebump.com/real-answers/v1/categories/33/questions?page_num=1&page_size=10&filter=ranking").json()
 total_que = js["total"]
 
