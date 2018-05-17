@@ -1,5 +1,6 @@
 import requests
 from urllib.parse import urlencode
+import csv
 from bs4 import BeautifulSoup
 import re
 # url_base = "https://www.thebump.com/real-answers/v1/categories/33/questions?"
@@ -53,15 +54,19 @@ def parse_page(par_json, chl_json):
             yield questions
 
 if __name__ == "__main__":
-    for i in range(33, 48):
-        page_num = ""+str(i)
-        total = get_total()
-        if get_page(page_num, 1, 10): #把10改为total
-            par_json, chl_json = get_page(page_num, 1, 10)
-            results = parse_page(par_json, chl_json)
-            for result in results:
-                 print(result)
-        else:
-            continue
+    headers = ["category_name", "subcategory_name", "title", "create_at", "user_id", "user_name"]
+    with open("F:/questions.csv", mode="a", newline="") as f:
+        writer = csv.DictWriter(f, headers)
+        for i in range(33, 48):
+            page_num = ""+str(i)
+            # total = get_total(chl_json)
+            if get_page(page_num, 1, 10): #把10改为total
+                par_json, chl_json = get_page(page_num, 1, 10)
+                results = parse_page(par_json, chl_json)
+                for result in results:
+                    print(result)
+                    writer.writerow(result)
+            else:
+                continue
 
 
