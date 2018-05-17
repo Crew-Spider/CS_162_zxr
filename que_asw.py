@@ -11,6 +11,8 @@ def get_total(chl_json):
 
 #返回父类和子类的js
 def get_page(page_id, page_num, page_size):
+    page_num = "" + str(page_num)
+    page_id = "" + str(page_id)
     pargram = {
         "page_num" : page_num,
         "page_size" : page_size,
@@ -18,8 +20,7 @@ def get_page(page_id, page_num, page_size):
     }
     #37 , 47中子分类可能为空
     url_par = url_base + page_id
-    url_chl = url_base + page_id + "/" + "questions?" + "/" + urlencode(pargram)
-    print(url_par, url_chl)
+    url_chl = url_base + page_id + "/" + "questions?"  + urlencode(pargram)
     try:
         response_par = requests.get(url_par)
         response_chl = requests.get(url_chl)
@@ -54,19 +55,48 @@ def parse_page(par_json, chl_json):
             yield questions
 
 if __name__ == "__main__":
+    #init_num 为一页爬取的条数
+    #page_id 为分类的id
+    #page_num 为当前分类的页数
     headers = ["category_name", "subcategory_name", "title", "create_at", "user_id", "user_name"]
-    with open("F:/questions.csv", mode="a", newline="") as f:
+    with open("F:/questions7.csv", mode="a", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, headers)
-        for i in range(33, 48):
-            page_num = ""+str(i)
-            # total = get_total(chl_json)
-            if get_page(page_num, 1, 10): #把10改为total
-                par_json, chl_json = get_page(page_num, 1, 10)
-                results = parse_page(par_json, chl_json)
-                for result in results:
-                    print(result)
-                    writer.writerow(result)
+        for i in range(33, 48):   #分类的id号
+            init_num = 1000
+            page_id = i
+            page_num = 1
+            if get_page(page_id, page_num, 1):
+                par_json, chl_json = get_page(page_id, page_num, 1)
+                total = get_total(chl_json)
             else:
                 continue
+            print(total)
+            if get_page(page_id, page_num, 1): #改为total
+                print("爬取中....")
+                while total > 0:
+                    if get_page(page_id, page_num, 1):
+                        par_json, chl_json = get_page(page_id, page_num, init_num)
+                        results = parse_page(par_json, chl_json)
+                        print("写入中....")
+                        for result in results:
+                            writer.writerow(result)
+                        if total - init_num > 0:
+                           total -= init_num
+                           print("1total " + str(total))
+                           print("1init_num" + str(init_num))
+                        elif total - init_num//10 > 0:
+                            total -= init_num//10
+                            init_num //= 10
+                            print("2total :" + str(total))
+                            print("2init_num/10" + str(init_num))
+                            if init_num == 0:
+                                break
+                        else:
+                            break
+                        page_num += 1
+                    else:
+                        continue
+            else:
+                 continue
 
 
